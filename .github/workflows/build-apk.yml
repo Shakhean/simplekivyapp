@@ -51,7 +51,8 @@ jobs:
         echo "$HOME/android/cmdline-tools/latest/bin" >> $GITHUB_PATH
         echo "ANDROID_HOME=$HOME/android" >> $GITHUB_ENV
         echo "ANDROID_SDK_ROOT=$HOME/android" >> $GITHUB_ENV
-        
+
+        # Accept licenses automatically to fix previous error
         yes | $HOME/android/cmdline-tools/latest/bin/sdkmanager --licenses
         $HOME/android/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-31" "build-tools;31.0.0"
 
