@@ -18,6 +18,12 @@ jobs:
       with:
         python-version: '3.8'
 
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
     - name: Install system dependencies
       run: |
         sudo apt update
@@ -25,7 +31,6 @@ jobs:
           git \
           zip \
           unzip \
-          openjdk-17-jdk \
           autoconf \
           libtool \
           pkg-config \
@@ -34,7 +39,21 @@ jobs:
           libncursesw5-dev \
           cmake \
           libffi-dev \
-          libssl-dev
+          libssl-dev \
+          wget
+
+    - name: Install Android SDK
+      run: |
+        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+        unzip commandlinetools-linux-9477386_latest.zip
+        mkdir -p $HOME/android/cmdline-tools
+        mv cmdline-tools $HOME/android/cmdline-tools/latest
+        echo "$HOME/android/cmdline-tools/latest/bin" >> $GITHUB_PATH
+        echo "ANDROID_HOME=$HOME/android" >> $GITHUB_ENV
+        echo "ANDROID_SDK_ROOT=$HOME/android" >> $GITHUB_ENV
+        
+        yes | $HOME/android/cmdline-tools/latest/bin/sdkmanager --licenses
+        $HOME/android/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-31" "build-tools;31.0.0"
 
     - name: Install Python dependencies
       run: |
