@@ -1,5 +1,4 @@
 [app]
-
 # (str) Title of your application
 title = Counter App
 
