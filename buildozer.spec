@@ -1,37 +1,62 @@
-[app]
+name: Build Kivy App
 
-# (str) Title of your application
-title = Counter App
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 
-# (str) Package name
-package.name = counterapp
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-# (str) Package domain (reverse domain style)
-package.domain = org.test
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
 
-# (str) Source code folder
-source.dir = .
+    - name: Install system dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y \
+          git \
+          zip \
+          unzip \
+          openjdk-17-jdk \
+          autoconf \
+          libtool \
+          pkg-config \
+          zlib1g-dev \
+          libncurses5-dev \
+          libncursesw5-dev \
+          libtinfo5 \
+          cmake \
+          libffi-dev \
+          libssl-dev \
+          libltdl-dev
 
-# (str) Include python files
-source.include_exts = py
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install buildozer cython virtualenv
 
-# (str) Main Python file
-source.main = main.py
+    - name: Cache buildozer directory
+      uses: actions/cache@v3
+      with:
+        path: ~/.buildozer
+        key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
+        restore-keys: |
+          ${{ runner.os }}-buildozer-
 
-# (str) Version number
-version = 0.1
+    - name: Build with buildozer
+      run: |
+        buildozer android debug
 
-# (list) Application requirements
-requirements = python3,kivy
-
-# (str) Orientation
-orientation = portrait
-
-# (int) Fullscreen mode (0 = no, 1 = yes)
-fullscreen = 0
-
-# (str) Icon of the app (optional, leave blank for now)
-icon.filename =
-
-# (list) Permissions your app needs (optional)
-android.permissions =
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: counter-app-apk
+        path: bin/*.apk
