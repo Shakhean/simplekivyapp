@@ -52,13 +52,17 @@ jobs:
         echo "ANDROID_HOME=$HOME/android" >> $GITHUB_ENV
         echo "ANDROID_SDK_ROOT=$HOME/android" >> $GITHUB_ENV
 
-        # Explicitly install and accept license for build-tools;37.0.0-rc2
-        $HOME/android/cmdline-tools/latest/bin/sdkmanager "build-tools;37.0.0-rc2"
-        yes | $HOME/android/cmdline-tools/latest/bin/sdkmanager --licenses | grep -A 10 "build-tools;37.0.0-rc2"
+        # Explicitly install the problematic RC package, ignore errors
+        $HOME/android/cmdline-tools/latest/bin/sdkmanager "build-tools;37-rc2" || true
 
-        # Install other required packages and accept remaining licenses
+        # Accept RC package license safely
+        echo "y" | $HOME/android/cmdline-tools/latest/bin/sdkmanager --licenses || true
+
+        # Install other required SDK packages
         $HOME/android/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-31" "build-tools;31.0.0"
-        yes | $HOME/android/cmdline-tools/latest/bin/sdkmanager --licenses
+
+        # Accept all remaining licenses automatically
+        yes | $HOME/android/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
     - name: Install Python dependencies
       run: |
